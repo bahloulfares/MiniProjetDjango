@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>{% if form.instance.pk %}Modifier{% else %}Créer{% endif %} une publication</title>
+    <!-- Link Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Style CSS personnalisé -->
+    <style>
+        /* Centrer le formulaire */
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Style du formulaire */
+        /* Style des labels en gras */
+        .form-container label {
+            font-weight: bold;
+        }
+
+        /* Style des boutons minimisés */
+        .btn {
+            padding: 0.375rem 0.75rem;
+            font-size: 0.875rem;
+        }
+
+        .btn-primary {
+            /* Other styles */
+            width: 150px;
+            /* Adjust width as needed */
+            height: 35px;
+            /* Adjust height as needed */
+            padding: 8px 12px;
+            /* Adjust padding as needed */
+            font-size: 14px;
+            /* Adjust font size as needed */
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark"
+        style="background-image: linear-gradient(45deg, #2196f3, #73a8f5, #ffc107);">
+        <a class="navbar-brand" href="#">Student_help</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav mr-auto">
+
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'post_list' %}"><i class="bi bi-caret-left-square-fill"></i></a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'create_post' %}">
+                        <i class="bi bi-plus-square"></i> Ajouter une publication
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'user_posts' %}">
+                        <i class="bi bi-list-stars"></i> Mes publicités
+                    </a>
+                </li>
+            </ul>
+            <!-- Afficher les informations de l'utilisateur -->
+            {% if user.is_authenticated %}
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item dropdown">
+                    <a class="nav-link text-light mb-0" href="#" id="navbarDropdown" role="button"
+                        data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-person-circle"></i> Bienvenue, {{ user.username }}
+                    </a>
+                </li>
+                <li><a class="nav-link text-light mb-0" href="{% url 'acceuil' %}"><i class="bi bi-box-arrow-right"></i>
+                        Déconnexion</a></li>
+            </ul>
+            {% else %}
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'login' %}"><i class="bi bi-box-arrow-in-right"></i> Connexion</a>
+            </li>
+            {% endif %}
+        </div>
+    </nav>
+    <div class="card">
+    </div>
+    <div class="card-body">
+        <div class="container">
+            <div class="form-container">
+                <h1 class="mb-4 text-center"  style="font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;">{% if form.instance.pk %}Modifier{% else %}Créer{% endif %} une publication
+                </h1>
+
+                <!-- Formulaire pour sélectionner le type de publication -->
+                <form method="get" enctype="multipart/form-data">
+                    <div class="form-group">
+                        {{ post_type_form.as_p }}
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Filtrer</button>
+                </form>
+
+                <hr> <!-- Ligne de séparation -->
+
+                <!-- Formulaire pour la publication -->
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <center><button type="submit" class="btn btn-primary btn-block">Publier</button></center>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- Link Bootstrap JS (Optional) -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <!-- Votre code JavaScript pour charger dynamiquement le bon formulaire en fonction du type sélectionné -->
+    <script>
+        $(document).ready(function () {
+            $('#id_type').change(function () {
+                var selectedType = $(this).val();
+                $('#post-form').attr('action', "{% url 'create_post' %}?type=" + selectedType);
+            });
+        });
+    </script>
+</body>
+
+</html>

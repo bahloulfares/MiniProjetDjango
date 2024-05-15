@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Détails de la publication</title>
+    <!-- Inclure Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body {
+            background-color:blanchedalmond;
+            color: #333; /* Couleur du texte */
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif; /* Police de caractères */
+        }
+
+        .card {
+            border-radius: 10px; /* Arrondir les coins */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Ajouter une ombre */
+            max-width: 600px; /* Limiter la largeur */
+            margin: 0 auto; /* Centrer horizontalement */
+            overflow: hidden; /* Masquer le contenu débordant */
+        }
+
+        .card-header img {
+            width: 100%; /* Ajuster la largeur de l'image */
+            border-top-left-radius: 10px; /* Arrondir le coin supérieur gauche */
+            border-top-right-radius: 10px; /* Arrondir le coin supérieur droit */
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        .card-title {
+            text-align: center; /* Centrer le titre */
+            margin-bottom: 20px;
+            font-size: 24px; /* Taille du titre */
+            color: #333; /* Couleur du titre */
+            text-transform: uppercase; /* Mettre en majuscules */
+            font-weight: bold; /* Mettre en gras */
+        }
+
+        .card-text {
+            margin-bottom: 10px;
+            font-size: 16px; /* Taille du texte */
+            line-height: 1.6; /* Hauteur de ligne */
+            color: #555; /* Couleur du texte */
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark"
+        style="background-image: linear-gradient(45deg, #2196f3, #73a8f5, #ffc107);">
+        <a class="navbar-brand" href="#">Student_help</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav mr-auto">
+
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'post_list' %}"><i class="bi bi-caret-left-square-fill"></i></a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'create_post' %}">Ajouter une publication</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'user_posts' %}">Mes publicités</a>
+                </li>
+            </ul>
+            <!-- Afficher les informations de l'utilisateur -->
+            {% if user.is_authenticated %}
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <p class="nav-link text-light mb-0">Bienvenue, {{ user.username }}</p>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'acceuil' %}">Déconnexion</a>
+                </li>
+            </ul>
+            {% else %}
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'login' %}">Connexion</a>
+                </li>
+            </ul>
+            {% endif %}
+        </div>
+    </nav>
+    <div class="container">
+        <article class="card mt-5">
+            
+            <div class="card-header">
+                    {% if post.image %}
+                    <img src="{{ post.image.url }}" class="card-img-top img-fluid" alt="{{ post.title }}">
+                    {% endif %}
+            
+            </div>
+            <div class="card-body">
+                <center><h1 class="card-title">{{ post.title }}</h1></center>
+                <p class="card-text"><strong>Description:</strong> {{ post.description }}</p>
+                <p class="card-text"><strong>Type de publication:</strong> {{ post.post_type }}</p>
+                <p class="card-text"><strong>Date:</strong> {{ post.date }}</p>
+                <p class="card-text"><strong>Location:</strong> {{ post.location }}</p>
+                <p class="card-text"><strong>Contact info:</strong> {{ post.contact_info }}</p>
+
+                <!-- Affichage des détails spécifiques en fonction du type de publication -->
+                {% if post.form_type == 'stage' %}
+                <p class="card-text"><strong>Stage type:</strong> {{ post.stage.stage_type }}</p>
+                <p class="card-text"><strong>Company:</strong> {{ post.stage.company }}</p>
+                <p class="card-text"><strong>Duration:</strong> {{ post.stage.duration }}</p>
+                <p class="card-text"><strong>Subject:</strong> {{ post.stage.subject }}</p>
+                <!-- Ajoutez d'autres détails spécifiques pour le type de publication 'stage' ici -->
+                {% elif post.form_type == 'housing' %}
+                <p class="card-text"><strong>Housing Type:</strong> {{ post.housing.housing_post_type }}</p>
+                <p class="card-text"><strong>Housing Location:</strong> {{ post.housing.housing_location }}</p>
+                <p class="card-text"><strong>Housing Description:</strong> {{ post.housing.housing_description }}</p>
+                <!-- Ajoutez d'autres détails spécifiques pour le type de publication 'housing' ici -->
+                {% elif post.form_type == 'transportation' %}
+                <p class="card-text"><strong>Departure:</strong> {{ post.transportation.departure }}</p>
+                <p class="card-text"><strong>Destination:</strong> {{ post.transportation.destination }}</p>
+                <p class="card-text"><strong>Departure Time:</strong> {{ post.transportation.departure_time }}</p>
+                <!-- Ajoutez d'autres détails spécifiques pour le type de publication 'transportation' ici -->
+                {% elif post.form_type == 'club_event' %}
+                <p class="card-text"><strong>Club:</strong> {{ post.clubevent.club }}</p>
+                <p class="card-text"><strong>Specialization:</strong> {{ post.clubevent.specialization }}</p>
+                <p class="card-text"><strong>Seat Capacity:</strong> {{ post.clubevent.seat_capacity }}</p>
+                <!-- Ajoutez d'autres détails spécifiques pour le type de publication 'club_event' ici -->
+                {% elif post.form_type == 'social_event' %}
+                <p class="card-text"><strong>Price:</strong> {{ post.socialevent.price }}</p>
+                <p class="card-text"><strong>Social Contact Info:</strong> {{ post.socialevent.social_contact_info }}
+                </p>
+                <!-- Ajoutez d'autres détails spécifiques pour le type de publication 'social_event' ici -->
+                {% endif %}
+            </div>
+        </article>
+    </div>
+
+</body>
+
+</html>

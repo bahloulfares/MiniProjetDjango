@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Liste des publications</title>
+    <!-- Link Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Link Bootstrap Icons CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        /* Custom CSS for card height, width, and image size */
+
+        /*********************/
+        article {
+            --img-scale: 1.001;
+            --title-color: black;
+            --link-icon-translate: -20px;
+            --link-icon-opacity: 0;
+            position: relative;
+            border-radius: 16px;
+            box-shadow: none;
+            /* background-image: linear-gradient(to bottom, #7c9885, #b5b682); */
+            background-color:rgb(160, 229, 229);
+            transform-origin: center;
+            transition: all 0.4s ease-in-out;
+            overflow: hidden;
+        }
+
+        /* basic article elements styling */
+        article h2 {
+            margin: 0 0 18px 0;
+            font-family: "Bebas Neue", cursive;
+            font-size: 1.9rem;
+            letter-spacing: 0.06em;
+            color: var(--title-color);
+            transition: color 0.3s ease-out;
+        }
+
+        figure {
+            margin: 0;
+            padding: 0;
+            aspect-ratio: 16 / 9;
+            overflow: hidden;
+        }
+
+        article img {
+            max-width: 100%;
+            transform-origin: center;
+            transform: scale(var(--img-scale));
+            transition: transform 0.4s ease-in-out;
+        }
+
+        .article-body {
+            padding: 24px;
+        }
+
+        article a {
+            display: inline-flex;
+            align-items: center;
+            text-decoration: none;
+            color: #28666e;
+        }
+
+        article a:focus {
+            outline: 1px dotted #28666e;
+        }
+
+        article a .icon {
+            min-width: 24px;
+            width: 24px;
+            height: 24px;
+            margin-left: 5px;
+            transform: translateX(var(--link-icon-translate));
+            opacity: var(--link-icon-opacity);
+            transition: all 0.3s;
+        }
+
+        /* using the has() relational pseudo selector to update our custom properties */
+        article:has(:hover, :focus) {
+            --img-scale: 1.1;
+            --title-color: #28666e;
+            --link-icon-translate: 0;
+            --link-icon-opacity: 1;
+            box-shadow: rgba(0, 0, 0, 0.16) 0px 10px 36px 0px, rgba(0, 0, 0, 0.06) 0px 0px 0px 1px;
+        }
+
+
+        /************************ 
+Generic layout (demo looks)
+**************************/
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: "Figtree", sans-serif;
+            font-size: 1.2rem;
+            line-height: 1.6rem;
+            /* background-image: linear-gradient(45deg, #ffc107, #ff9800, #f44336); */
+
+            /* background-image: linear-gradient(45deg, rgba(0, 153, 255, 0.5), rgba(255, 255, 255, 0.5)); */
+
+            background-image: linear-gradient(45deg, #2196f3, #73a8f5, #ffc107);
+
+
+            min-height: 100vh;
+        }
+
+        .articles {
+            display: grid;
+            max-width: 1200px;
+            margin-inline: auto;
+            padding-inline: 24px;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 24px;
+        }
+
+        @media screen and (max-width: 960px) {
+            article {
+                container: card/inline-size;
+            }
+
+            .article-body p {
+                display: none;
+            }
+        }
+
+        @container card (min-width: 380px) {
+            .article-wrapper {
+                display: grid;
+                grid-template-columns: 100px 1fr;
+                gap: 16px;
+            }
+
+            .article-body {
+                padding-left: 0;
+            }
+
+            figure {
+                width: 100%;
+                height: 100%;
+                overflow: hidden;
+            }
+
+            figure img {
+                height: 100%;
+                aspect-ratio: 1;
+                object-fit: cover;
+            }
+        }
+
+        .sr-only:not(:focus):not(:active) {
+            clip: rect(0 0 0 0);
+            clip-path: inset(50%);
+            height: 1px;
+            overflow: hidden;
+            position: absolute;
+            white-space: nowrap;
+            width: 1px;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark" style="background-image: linear-gradient(45deg, #2196f3, #73a8f5, #ffc107);">
+        <a class="navbar-brand" href="#">Student_help</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav mr-auto">
+  
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'post_list' %}"><i class="bi bi-caret-left-square-fill"></i></a>
+                    </li>
+          
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'create_post' %}">Ajouter une publication</a>
+                </li>
+                <!-- <li class="nav-item">
+                    <a class="nav-link" href="{% url 'user_posts' %}">Mes publicités</a>
+                </li> -->
+            </ul>
+            <!-- Afficher les informations de l'utilisateur -->
+            {% if user.is_authenticated %}
+            <ul class="navbar-nav">
+                <li class="nav-item dropdown">
+                    <a class="nav-link text-light mb-0" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-person-circle"></i> Bienvenue, {{ user.username }}
+                      </a>
+                </li>
+                <li class="nav-item">
+                    <li><a class="nav-link text-light mb-0" href="{% url 'acceuil' %}"><i class="bi bi-box-arrow-right"></i> Déconnexion</a></li>
+
+                </li>
+            </ul>
+            {% else %}
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'login' %}">Connexion</a>
+                </li>
+
+            </ul>
+            {% endif %}
+        </div>
+    </nav>
+    <!--modal de suppression -->
+    <div class="modal fade" id="confirmDeleteModal" tabindex="-1" role="dialog"
+        aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmDeleteModalLabel">Confirmer la suppression</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>Êtes-vous sûr de vouloir supprimer cet élément ?</p>
+                </div>
+                <div class="modal-footer">
+                    <form id="deleteForm" method="post">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger">Confirmer la suppression</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--Modal de commentaire -->
+    <div class="modal fade" id="commentModal" tabindex="-1" role="dialog" aria-labelledby="commentModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="commentModalLabel">Commentaires</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <ul id="commentList" class="list-group">
+                        <!-- Les commentaires seront ajoutés ici via JavaScript -->
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="container mt-4">
+        <center>
+            <h1  style="font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;">Liste des publications</h1>
+        </center><br><br>
+        <!-- Formulaire de recherche -->
+        <form method="get">
+            <div class="form-row">
+                <div class="col-md-8">
+                    <input type="text" name="recherche" placeholder="Rechercher..." class="form-control">
+                </div>
+                <div class="col-md-4">
+                    <button type="submit" class="btn btn-primary">Rechercher</button>
+                </div>
+            </div>
+        </form>
+        <!-- Fin du formulaire de recherche -->
+        <br>
+        <div class="row">
+            <section class="articles">
+                <!-- post_list.html -->
+
+                {% for post in posts %}
+                <article>
+                    <div class="article-wrapper">
+                        <figure>
+                            {% if post.image %}
+                            <img src="{{ post.image.url }}" class="card-img-top img-fluid" alt="{{ post.title }}">
+                            {% endif %}
+                        </figure>
+                        <div class="article-body">
+                            <h5 class="card-title">{{ post.title }}</h5>
+                            <p class="card-text"><strong>Type:</strong> {{ post.post_type }}</p>
+                            <p class="card-text"><strong>Date:</strong> {{ post.date }}</p>
+                            
+                            <div class="mt-auto">
+                                <button class="btn btn-primary like-btn" data-post-id="{{ post.id }}">
+                                    <i class="bi bi-hand-thumbs-up">
+                                        <span class="like-count">{{ post.likes.count }}</span>
+                                    </i>
+                                </button>
+                                <a href="{% url 'post_detail' post.id %}" class="btn btn-primary"><i class="bi bi-eye"></i></a>
+                                <!-- Bouton Modifier -->
+                                <a href="{% url 'user_post_update' post.id %}" class="btn btn-primary">
+                                    <i class="bi bi-pencil-fill"></i>
+                                </a>
+                                <!-- Bouton Supprimer -->
+                                <a href="#" class="btn btn-danger delete-btn" data-url="{% url 'post_delete' post.id %}" data-toggle="modal"
+                                    data-target="#confirmDeleteModal">
+                                    <i class="bi bi-trash-fill"></i>
+                                </a>
+                            </div><br>
+                            <div class="mt-auto">
+                                <form class="comment-form" action="{% url 'add_comment' post.id %}" method="post" style="display: none;">
+                                    {% csrf_token %}
+                                    <div class="form-group">
+                                        <label for="comment_text">Commentaire</label>
+                                        <textarea class="form-control" id="comment_text" name="text" rows="3" placeholder="Ajouter un commentaire"></textarea>
+                                        <button type="submit" class="btn btn-primary">Ajouter</button>
+                                    </div>
+                                    
+                                </form><br>
+                                <button class="btn btn-secondary show-comment-form-btn"><i class="bi bi-chat-dots"></i></button>
+                                <button class="btn btn-primary comment-modal-btn" data-toggle="modal"
+                                    data-target="#commentModal" data-post-id="{{ post.id }}">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+                {% endfor %}
+
+            </section>
+        </div>
+
+        <!-- Pagination -->
+        {% if is_paginated %}
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page=1" tabindex="-1">&laquo;</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}">{{ page_obj.previous_page_number}}</a>
+            </li>
+            {% endif %}
+            <li class="page-item active">
+                <a class="page-link" href="?page={{ page_obj.number }}">{{ page_obj.number }} <span
+                        class="sr-only">(current)</span></a>
+            </li>
+            {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}">{{ page_obj.next_page_number }}</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ paginator.num_pages }}">&raquo;</a>
+            </li>
+            {% endif %}
+        </ul>
+        {% endif %}
+        <!-- End Pagination -->
+
+    </div>
+
+    <!-- Link Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Toggle comment section visibility
+            var likeBtns = document.querySelectorAll('.like-btn'); // Ajout de la sélection des boutons "J'aime"
+            likeBtns.forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    var postId = this.getAttribute('data-post-id');
+
+                    fetch(`/add_like/${postId}/`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': getCookie('csrftoken') // Obtient le jeton CSRF depuis les cookies
+                        }
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            // Mettre à jour le nombre de likes dans le DOM
+                            var likeCountSpan = this.parentElement.querySelector('.like-count');
+                            likeCountSpan.textContent = data.like_count;
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                        });
+                });
+            });
+        });
+
+        // Fonction pour obtenir le jeton CSRF depuis les cookies
+        function getCookie(name) {
+            var cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                var cookies = document.cookie.split(';');
+                for (var i = 0; i < cookies.length; i++) {
+                    var cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        $(document).ready(function () {
+            $('.delete-btn').click(function () {
+                var deleteUrl = $(this).data('url');
+                $('#deleteForm').attr('action', deleteUrl); // Met à jour l'URL de suppression dans le formulaire
+                $('#confirmDeleteModal').modal('show'); // Ouvre le modal de confirmation
+            });
+        });
+        /* gerer les commentaire */
+        /*afficher les commentaire*/
+        $(document).ready(function () {
+            $('.comment-modal-btn').click(function () {
+                var postId = $(this).data('post-id');
+                fetch('/comments/?post_id=' + postId)
+                    .then(response => response.text())
+                    .then(data => {
+                        $('#commentModal .modal-content').html(data);
+                        $('#commentModal').modal('show');
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
+            });
+        });
+        /*supprimer les commentaire */
+        $(document).ready(function () {
+            // Gestion de la suppression des commentaires
+            $('#commentModal').on('click', '.delete-comment-btn', function () {
+                var deleteUrl = $(this).data('comment-url');
+
+                // Vérifiez si deleteUrl est défini
+                if (deleteUrl) {
+                    // Utilisation de fetch pour effectuer la requête AJAX
+                    fetch(deleteUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': '{{ csrf_token }}' // Assurez-vous que le jeton CSRF est inclus dans les en-têtes
+                        },
+                        body: JSON.stringify({}), // Si vous n'envoyez pas de données dans le corps de la requête
+                    })
+                        .then(response => {
+                            if (response.ok) {
+                                // Si la suppression réussit, vous pouvez mettre à jour l'interface utilisateur ici
+                                $('#commentModal').modal('hide'); // Fermer le modal
+                                location.reload(); // Par exemple, actualiser la page après la suppression
+                            } else {
+                                throw new Error('La suppression a échoué');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                        });
+                } else {
+                    console.error('URL de suppression de commentaire non définie.');
+                }
+            });
+        });
+        /*ajouter commentaire */
+        $(document).ready(function () {
+                $('.show-comment-form-btn').click(function () {
+                    $(this).siblings('.comment-form').toggle(); // Affiche ou masque le formulaire de commentaire
+                });
+            });
+
+
+
+    </script>
+
+</body>
+
+</html>
